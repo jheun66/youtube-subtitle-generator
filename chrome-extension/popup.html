@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube AI Subtitle Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+        </div>
+        <span class="logo-text">Subtitle<span>AI</span></span>
+      </div>
+      <p class="header-subtitle">ElevenLabs STT + Gemini Translation</p>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- Status Card -->
+    <div class="status-card">
+      <div class="status-header">
+        <span class="status-label">Current Video</span>
+        <div class="status-indicator">
+          <span class="status-dot" id="serverStatus"></span>
+          <span id="serverStatusText">Checking...</span>
+        </div>
+      </div>
+      <div id="videoInfo">
+        <div class="no-video">
+          <p>Navigate to a YouTube video to get started</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="settings-section">
+      <h3 class="section-title">Settings</h3>
+      
+      <div class="setting-row">
+        <div class="setting-label">
+          <span class="setting-name">Source Language</span>
+          <svg class="setting-icon" viewBox="0 0 24 24">
+            <path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
+          </svg>
+        </div>
+        <div class="select-wrapper">
+          <select id="sourceLanguage">
+            <option value="auto">Auto Detect</option>
+            <option value="en">English</option>
+            <option value="ko">Korean</option>
+            <option value="ja">Japanese</option>
+            <option value="zh">Chinese</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">
+          <span class="setting-name">Target Language</span>
+          <svg class="setting-icon" viewBox="0 0 24 24">
+            <path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
+          </svg>
+        </div>
+        <div class="select-wrapper">
+          <select id="targetLanguage">
+            <option value="ko">Korean (한국어)</option>
+            <option value="en">English</option>
+            <option value="ja">Japanese (日本語)</option>
+            <option value="zh">Chinese (中文)</option>
+            <option value="es">Spanish (Español)</option>
+            <option value="fr">French (Français)</option>
+            <option value="de">German (Deutsch)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-label">
+          <span class="setting-name">Save Path</span>
+          <svg class="setting-icon" viewBox="0 0 24 24">
+            <path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+          </svg>
+        </div>
+        <input type="text" id="savePath" class="text-input" placeholder="/Users/you/subtitles">
+      </div>
+
+      <div class="setting-row checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="forceRegenerate">
+          <span class="checkbox-custom"></span>
+          <span class="setting-name">Force regenerate (ignore cache)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Generate Button -->
+    <button class="generate-btn" id="generateBtn" disabled>
+      <svg viewBox="0 0 24 24">
+        <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+      </svg>
+      Generate Subtitles
+    </button>
+
+    <!-- Load from File -->
+    <input type="file" id="loadFileInput" accept=".json" style="display:none">
+    <button class="load-file-btn" id="loadFileBtn">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM6 20V4h6v5a1 1 0 0 0 1 1h5v10H6z"/></svg>
+      Load from File
+    </button>
+
+    <!-- Progress Section -->
+    <div class="progress-section" id="progressSection">
+      <div class="progress-header">
+        <span class="progress-status" id="progressStatus">Processing...</span>
+        <span class="progress-percent" id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar-wrapper">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="progress-steps">
+        <div class="progress-step" id="step1">
+          <span class="step-icon">
+            <svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+          </span>
+          <span>Extracting audio from video...</span>
+        </div>
+        <div class="progress-step" id="step2">
+          <span class="step-icon">
+            <svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+          </span>
+          <span>Transcribing with ElevenLabs...</span>
+        </div>
+        <div class="progress-step" id="step3">
+          <span class="step-icon">
+            <svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+          </span>
+          <span>Translating with Gemini AI...</span>
+        </div>
+        <div class="progress-step" id="step4">
+          <span class="step-icon">
+            <svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+          </span>
+          <span>Generating subtitle file...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-section" id="resultsSection">
+      <div class="result-card">
+        <div class="result-header">
+          <span class="result-title">Generated Subtitles</span>
+          <div class="result-actions">
+            <button class="action-btn" id="showOnVideoBtn">
+              <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+              Show
+            </button>
+          </div>
+        </div>
+        <div class="result-content" id="resultContent">
+          <!-- Subtitle lines will be inserted here -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <span class="footer-version">v1.0.0</span>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

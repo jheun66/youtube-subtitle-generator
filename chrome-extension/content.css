@@ -1,0 +1,69 @@
+/* content.css - Subtitle overlay styles */
+
+#ai-subtitle-overlay {
+  position: absolute;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ai-subtitle-container {
+  max-width: 80%;
+  padding: 0 20px;
+}
+
+.ai-subtitle-text {
+  display: none;
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 36px;
+  font-weight: 900;
+  color: #ffffff;
+  text-align: center;
+  line-height: 1.4;
+  padding: 8px 16px;
+  background: none;
+  paint-order: stroke fill;
+  -webkit-text-stroke: 4px #000000;
+  text-shadow:
+    0 0 8px rgba(0, 0, 0, 0.8),
+    0 0 16px rgba(0, 0, 0, 0.4);
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+/* Responsive font sizes */
+@media (max-width: 854px) {
+  .ai-subtitle-text {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  .ai-subtitle-text {
+    font-size: 22px;
+    padding: 6px 12px;
+  }
+  
+  #ai-subtitle-overlay {
+    bottom: 40px;
+  }
+}
+
+/* Fullscreen adjustments */
+.html5-video-player.ytp-fullscreen #ai-subtitle-overlay {
+  bottom: 80px;
+}
+
+.html5-video-player.ytp-fullscreen .ai-subtitle-text {
+  font-size: 48px;
+}
+
+@media (max-width: 1280px) {
+  .html5-video-player.ytp-fullscreen .ai-subtitle-text {
+    font-size: 40px;
+  }
+}

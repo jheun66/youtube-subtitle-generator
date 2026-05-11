@@ -1,0 +1,29 @@
+# Python virtual environments
+backend/py314/
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Environment variables (contains API keys)
+backend/.env
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Generated subtitle/audio temp files
+/tmp/subtitle_generator/
+
+# VS Code (optional — remove if you want to track workspace settings)
+.vscode/
+
+# Node
+node_modules/
