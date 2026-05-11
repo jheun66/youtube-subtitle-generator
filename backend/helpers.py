@@ -1,12 +1,15 @@
 """Shared helpers: language mapping, Gemini API call, path validation."""
 import asyncio
 import json
+import re
 from pathlib import Path
 
 import httpx
 from fastapi import HTTPException
 
 from config import GEMINI_API_KEY
+
+VIDEO_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{11}$")
 
 LANGUAGE_NAMES = {
     "en": "English", "ko": "Korean", "ja": "Japanese", "zh": "Chinese",
@@ -101,3 +104,16 @@ def validate_save_path(save_path: str) -> Path:
     if not path.is_absolute():
         raise HTTPException(status_code=400, detail="save_path must be an absolute path")
     return path
+
+
+def validate_video_id(video_id: str) -> str:
+    """Reject anything that isn't a YouTube video ID (11 chars, [A-Za-z0-9_-]).
+
+    Prevents glob metacharacters from reaching AUDIO_DIR.glob() / unlink loops.
+    """
+    if not VIDEO_ID_PATTERN.match(video_id):
+        raise HTTPException(
+            status_code=400,
+            detail="video_id must be 11 characters of [A-Za-z0-9_-]"
+        )
+    return video_id

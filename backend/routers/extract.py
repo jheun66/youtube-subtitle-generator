@@ -4,15 +4,18 @@ import asyncio
 from fastapi import APIRouter, HTTPException
 
 from config import AUDIO_DIR, FFMPEG_AVAILABLE
+from helpers import validate_video_id
 from schemas import ExtractRequest, ExtractResponse
 
 router = APIRouter()
+
+AUDIO_EXTENSIONS = ('mp3', 'm4a', 'webm', 'opus', 'ogg')
 
 
 @router.post("/extract", response_model=ExtractResponse)
 async def extract_audio(request: ExtractRequest):
     """Extract audio from YouTube video using yt-dlp"""
-    video_id = request.video_id
+    video_id = validate_video_id(request.video_id)
     video_url = f"https://www.youtube.com/watch?v={video_id}"
 
     if FFMPEG_AVAILABLE:
@@ -20,8 +23,7 @@ async def extract_audio(request: ExtractRequest):
     else:
         audio_format = "m4a"
 
-    # Check if already extracted (check for multiple possible extensions)
-    for ext in ['mp3', 'm4a', 'webm', 'opus']:
+    for ext in AUDIO_EXTENSIONS:
         existing_path = AUDIO_DIR / f"{video_id}.{ext}"
         if existing_path.exists():
             return ExtractResponse(
@@ -92,9 +94,8 @@ async def extract_audio(request: ExtractRequest):
                 detail=f"Failed to extract audio: {error_msg}"
             )
 
-        # Find the downloaded file (extension may vary)
         actual_path = None
-        for ext in ['mp3', 'm4a', 'webm', 'opus', 'ogg']:
+        for ext in AUDIO_EXTENSIONS:
             check_path = AUDIO_DIR / f"{video_id}.{ext}"
             if check_path.exists():
                 actual_path = check_path
@@ -102,7 +103,7 @@ async def extract_audio(request: ExtractRequest):
 
         if not actual_path:
             for f in AUDIO_DIR.glob(f"{video_id}*"):
-                if f.is_file() and f.suffix in ['.mp3', '.m4a', '.webm', '.opus', '.ogg']:
+                if f.is_file() and f.suffix.lstrip('.') in AUDIO_EXTENSIONS:
                     actual_path = f
                     break
 

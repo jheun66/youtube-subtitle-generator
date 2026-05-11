@@ -6,6 +6,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException
 
 from config import AUDIO_DIR
+from helpers import validate_video_id
 from pipeline import job_worker
 from schemas import GenerateRequest, GenerateResponse, JobState, JobStatus
 from state import cleanup_expired_jobs, job_queue, jobs, start_worker_if_needed
@@ -16,6 +17,7 @@ router = APIRouter()
 @router.post("/generate", response_model=GenerateResponse)
 async def generate_subtitles_job(request: GenerateRequest):
     """Start full subtitle generation pipeline"""
+    validate_video_id(request.video_id)
     cleanup_expired_jobs()
     job_id = str(uuid.uuid4())
     now = datetime.now().timestamp()

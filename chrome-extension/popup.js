@@ -462,7 +462,7 @@ generateBtn.addEventListener('click', async () => {
   }
 
   if (!serverOnline) {
-    showToast('Server is offline. Start it with: python server.py');
+    showToast('Server is offline. Start it with: python main.py');
     return;
   }
 

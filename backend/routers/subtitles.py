@@ -5,7 +5,7 @@ from typing import Optional
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
 from config import AUDIO_DIR
-from helpers import validate_save_path
+from helpers import validate_save_path, validate_video_id
 from schemas import SubtitleSegment
 
 router = APIRouter()
@@ -14,6 +14,7 @@ router = APIRouter()
 @router.get("/subtitles/{video_id}")
 async def get_subtitles(video_id: str, language: Optional[str] = None, save_path: Optional[str] = None):
     """Get the latest subtitles for a video (translation or transcript)"""
+    validate_video_id(video_id)
 
     print(f"\n=== Get Subtitles Request ===")
     print(f"Video ID: {video_id}")
@@ -100,6 +101,7 @@ async def get_subtitles(video_id: str, language: Optional[str] = None, save_path
 @router.delete("/cleanup/{video_id}")
 async def cleanup_files(video_id: str, background_tasks: BackgroundTasks):
     """Clean up temporary files for a video"""
+    validate_video_id(video_id)
 
     def delete_files():
         for pattern in [f"{video_id}*"]:

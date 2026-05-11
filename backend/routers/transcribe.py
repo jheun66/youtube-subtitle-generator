@@ -145,9 +145,9 @@ async def transcribe_audio(request: TranscribeRequest):
                     text_so_far = current_segment["text"].strip()
 
                     should_end = (
-                        segment_duration >= 5.0 and any(text_so_far.endswith(p) for p in ".!?。！？") or
-                        segment_duration >= 8.0 or
-                        len(text_so_far.split()) >= 15
+                        (segment_duration >= 5.0 and any(text_so_far.endswith(p) for p in ".!?。！？"))
+                        or segment_duration >= 8.0
+                        or len(text_so_far.split()) >= 15
                     )
 
                     if should_end and current_segment["words"]:
