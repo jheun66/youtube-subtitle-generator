@@ -101,7 +101,7 @@ python main.py
 2. YouTube 동영상 페이지로 이동
 3. 확장 프로그램 아이콘 클릭
 4. 소스/타겟 언어 선택
-5. 저장 경로 설정 (결과 JSON이 저장될 디렉토리)
+5. 저장 경로 설정 (선택사항, 비워두면 `~/subtitles`에 저장)
 6. "Generate Subtitles" 버튼 클릭
 7. 완료 후 "Show" 버튼으로 영상 위에 자막 표시
 
@@ -124,7 +124,7 @@ python main.py
 | `/extract` | POST | YouTube 오디오 추출 |
 | `/transcribe` | POST | 음성 인식 (ElevenLabs) |
 | `/translate` | POST | 번역 (Gemini) |
-| `/subtitles/{video_id}` | GET | 저장된 자막 조회 (사용자 경로 우선) |
+| `/subtitles/{video_id}` | GET | 저장된 자막 조회 (사용자 경로 → `~/subtitles` → temp) |
 | `/cleanup/{video_id}` | DELETE | 임시 파일 정리 |
 
 ## 🌐 지원 언어

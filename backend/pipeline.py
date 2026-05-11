@@ -8,7 +8,7 @@ import httpx
 from fastapi import HTTPException
 from json_repair import loads as json_repair_loads
 
-from config import AUDIO_DIR, GEMINI_API_KEY
+from config import AUDIO_DIR, DEFAULT_SAVE_DIR, GEMINI_API_KEY
 from helpers import LANGUAGE_NAMES, build_translation_prompt, call_gemini_translate, validate_save_path
 from routers.extract import extract_audio
 from routers.transcribe import transcribe_audio
@@ -78,33 +78,31 @@ async def run_pipeline(job_id: str, video_id: str, source_lang: str,
         else:
             update_job(job_id, progress=90, message="No translation needed (same language)")
 
-        # Step 4: Save result to user path
-        if save_path:
-            update_job(job_id, step=4, progress=95, message="Saving result...")
+        # Step 4: Save result (user-provided path or default)
+        update_job(job_id, step=4, progress=95, message="Saving result...")
 
-            save_dir = validate_save_path(save_path)
-            save_dir.mkdir(parents=True, exist_ok=True)
+        save_dir = validate_save_path(save_path) if save_path else DEFAULT_SAVE_DIR
+        save_dir.mkdir(parents=True, exist_ok=True)
 
-            translation_file = AUDIO_DIR / f"{video_id}_translation_{target_lang}.json"
-            transcript_file = AUDIO_DIR / f"{video_id}_transcript.json"
+        translation_file = AUDIO_DIR / f"{video_id}_translation_{target_lang}.json"
+        transcript_file = AUDIO_DIR / f"{video_id}_transcript.json"
 
-            src_file = translation_file if translation_file.exists() else transcript_file
-            if src_file.exists():
-                dst_file = save_dir / src_file.name
-                shutil.copy2(src_file, dst_file)
-                print(f"Result saved to: {dst_file}")
+        src_file = translation_file if translation_file.exists() else transcript_file
+        if src_file.exists():
+            dst_file = save_dir / src_file.name
+            shutil.copy2(src_file, dst_file)
+            print(f"Result saved to: {dst_file}")
 
-                # Cache subtitles in memory before deleting temp files
-                with open(src_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    update_job(job_id, subtitles=data.get("segments", []))
+            with open(src_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                update_job(job_id, subtitles=data.get("segments", []))
 
-            for f in AUDIO_DIR.glob(f"{video_id}*"):
-                try:
-                    f.unlink()
-                    print(f"Cleaned up: {f.name}")
-                except Exception as e:
-                    print(f"Failed to clean up {f.name}: {e}")
+        for f in AUDIO_DIR.glob(f"{video_id}*"):
+            try:
+                f.unlink()
+                print(f"Cleaned up: {f.name}")
+            except Exception as e:
+                print(f"Failed to clean up {f.name}: {e}")
 
         update_job(job_id, status=JobStatus.COMPLETE, step=4, progress=100,
                    message="Complete!")

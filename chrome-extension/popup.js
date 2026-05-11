@@ -58,6 +58,11 @@ async function checkServerStatus() {
       serverStatus.classList.add('connected');
       serverStatus.classList.remove('error');
       serverStatusText.textContent = 'Server Connected';
+
+      const health = await response.json();
+      if (health.default_save_path) {
+        savePath.placeholder = health.default_save_path;
+      }
     } else {
       throw new Error('Server not responding');
     }

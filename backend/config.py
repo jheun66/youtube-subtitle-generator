@@ -14,5 +14,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 AUDIO_DIR = Path(tempfile.gettempdir()) / "subtitle_generator"
 AUDIO_DIR.mkdir(exist_ok=True)
 
+DEFAULT_SAVE_DIR = Path.home() / "subtitles"
+
 FFMPEG_AVAILABLE = shutil.which("ffmpeg") is not None
 FFPROBE_AVAILABLE = shutil.which("ffprobe") is not None

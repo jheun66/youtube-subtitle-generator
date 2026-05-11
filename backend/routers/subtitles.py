@@ -4,7 +4,7 @@ from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
-from config import AUDIO_DIR
+from config import AUDIO_DIR, DEFAULT_SAVE_DIR
 from helpers import validate_save_path, validate_video_id
 from schemas import SubtitleSegment
 
@@ -24,6 +24,7 @@ async def get_subtitles(video_id: str, language: Optional[str] = None, save_path
     search_dirs = []
     if save_path:
         search_dirs.append(validate_save_path(save_path))
+    search_dirs.append(DEFAULT_SAVE_DIR)
     search_dirs.append(AUDIO_DIR)
 
     if language:
